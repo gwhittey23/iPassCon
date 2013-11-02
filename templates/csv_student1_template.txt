@@ -1,0 +1,22 @@
+{% comment %}
+#following is list of the fields needed in powerschool csv file Student Tab
+
+"Student_Number", "SchoolID", "First_Name", "Middle_Name", "Grade Level", "Gender", "Ethnicity", "DOB", "SSN", "EntryDate", "ExitDate" , "Enroll Status" ,
+"Sched_NextYearGrade" , "Next_School" , "Sched_Scheduled" , "Sched_YearOfGraduation" , "EntryCode" , "TransferComment" , "Districtentrydate" , "Schoolentrydate" ,
+"Street" , "City" , "State" , "Zip" , "Home_Phone" , "Family_Ident" , "Mailing_Street" , "Mailing_City" , "Mailing_State" , "Mailing_Zip" , "Father" , "fatherdayphone" ,
+"Father_home_phone" , "Mother" , "MotherDayPhone" , "Mother_home_phone" , "Guardianship" , "Guardian_ln" , "Guardian_fn" , "Emerg Contact 1" , "Emerg_1_rel" ,
+"Emerg_1_Ptype" , "Emerg Phone 1" , "Emerg Contact 2" , "Emerg_2_rel" , "Emerg_2_Ptype" , "Emerg Phone 2" , "Emerg Contact 3" , "Emerg_3_rel" , "Emerg_3_Ptype" ,
+"Emerg_3_Phone" , "home_room"
+
+
+-->
+{% endcomment %}
+"Student_Number", "SchoolID", "First_Name", "Middle_Name", "Grade Level", "Gender", "Ethnicity", "DOB", "SSN", "EntryDate", "ExitDate" , "Enroll Status" , "" , "Next_School" , "Sched_Scheduled" , "Sched_YearOfGraduation" , "EntryCode" , "TransferComment" , "Districtentrydate" , "Schoolentrydate" , "Street" , "City" , "State" , "Zip" , "Home_Phone" , "Family_Ident" , "Mailing_Street" , "Mailing_City" , "Mailing_State" , "Mailing_Zip" , "Father" , "fatherdayphone" , "Father_home_phone" , "Mother" , "MotherDayPhone" , "Mother_home_phone" , "Guardianship" , "Guardian_ln" , "Guardian_fn" , "Emerg Contact 1" , "Emerg_1_rel" , "Emerg_1_Ptype" , "Emerg Phone 1" , "Emerg Contact 2" , "Emerg_2_rel" , "Emerg_2_Ptype" , "Emerg Phone 2" , "Emerg Contact 3" , "Emerg_3_rel" , "Emerg_3_Ptype" , "Emerg_3_Phone" , "home_room"
+
+
+{% for student in student_data %}
+    "{{ student.studentid|addslashes }}", "{{ student.buildingcode|addslashes |addslashes }}", "{{ student.personseq.firstname|addslashes }}", "{{ student.i.personseq.middleinitial|addslashes }}", "{{ student.personseq.lastname|addslashes }}", "{{ student.gradelevel|addslashes }}, "
+    "{{ student.gender |addslashes }}" , "!---Ethnicity---!" , "{{ student.dateofbirth |addslashes }}", "{{ student.ssn |addslashes }}", "!---FTEID---!", "!---EntryDate---!", "!---Exitdate---!",
+    "!---Enroll Statu---", "{{ student.gradelevel|add:"1" }}", "!---Next_School---", "Sched_Scheduled---!" , "!---Sched_YearOfGraduation---!" , "!---EntryCode---!" ,
+    "!---TransferComment---!" , "!---Districtentrydate---!" , "!---Schoolentrydate---!" ,
+{% endfor %}

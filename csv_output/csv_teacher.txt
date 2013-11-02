@@ -1,0 +1,1 @@
+"TeacherNumber","SchoolID","Last Name","First Name","Middle_name","Title","Gender","DOB","Ethnicity","Email_Addr","StaffStatus","Status","Home Phone","School Phone","SSN","Street","City","State","Zip","Homeroom","LoginID","Password","PSaccess","Group","canchangeschool","TeacherLoginid","Teacherloginpw","Ptaccess","sched_scheduled"
