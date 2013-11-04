@@ -9,3 +9,8 @@ def get_full_address(data):
     mydata = mydata + data.addressseq.address2 + ' ' + data.addressseq.address3
     return mydata
 
+
+def write_error(err_name, studentid):
+    error_file = 'student_error.txt'
+    err = open(error_file, 'a')
+    err.write(str(studentid) + ',' +  err_name+ '\n')

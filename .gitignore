@@ -4,3 +4,5 @@
 *.pyc
 /.idea
 .DS_Store
+/db_dql
+/csv_output

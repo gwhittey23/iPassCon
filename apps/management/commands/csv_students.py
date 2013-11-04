@@ -1,6 +1,6 @@
 from optparse import make_option
 from django.core.management.base import BaseCommand
-from ...helpers import get_full_address
+from ...helpers import get_full_address, write_error
 import csv
 
 
@@ -31,18 +31,54 @@ class Command(BaseCommand):
             outfile = open(csv_output_file, "wb")
             my_writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             my_writer.writerow(header)
-            import conv.models
-            student_data = conv.models.Student.objects.all()
+            from conv.models import Student, Stuethnicx, Address, Addressperson, Addresstype, Phoneperson
+
+            student_data = Student.objects.all()[:300]
             for a_student in student_data:
-                a_stuethnicx = conv.models.Stuethnicx.objects.get(studentid=a_student.studentid)  # student ethnicity
-                student_address = conv.models.Addressperson.objects.get(studentid=a_student.studentid, addresstypeseq=1)
-                mailing_address = conv.models.Addressperson.objects.get(studentid=a_student.studentid, addresstypeseq=5)
-                # have to join address from iPass address1,address2,address3 to 1 address field for powerschool
-                 #mailing_address_street() does this.
+                print a_student.studentid
+
+                try:
+                    a_stuethnicx = Stuethnicx.objects.filter(studentid=a_student.studentid)[
+                                   :1].get()  # student ethnicity
+                except Stuethnicx.DoesNotExist:
+                    write_error("a_stuethnicx", a_student.studentid)
+                    print '*********'
+                    print "a_stuethnicx"
+                    print a_student.studentid
+                    print '*********'
+
+                try:
+                    student_address = Addressperson.objects.filter(studentid=a_student.studentid, addresstypeseq=2)[
+                                      :1].get()
+                except Addressperson.DoesNotExist:
+                    write_error("student_address", a_student.studentid)
+                    print '*********'
+                    print "student_address"
+                    print a_student.studentid
+                    print '*********'
+                try:
+                    mailing_address = Addressperson.objects.filter(studentid=a_student.studentid, addresstypeseq=5)[
+                                      :1].get()
+                except Addressperson.DoesNotExist:
+                    write_error("mailing_address", a_student.studentid)
+                    print '*********'
+                    print 'mailing_address'
+                    print a_student.studentid
+                    print '*********'
+                    # have to join address from iPass address1,address2,address3 to 1 address field for powerschool
+                    #mailing_address_street() does this.
                 mailing_address_street = get_full_address(mailing_address)
                 home_address_street = get_full_address(student_address)
-                home_phone = conv.models.Phoneperson.objects.get(studentid=a_student.studentid, phonetypeseq=1)
-                # need to add in 'code' for all !---xxxx---! items added in as placeholder
+                try:
+                    home_phone = Phoneperson.objects.filter(studentid=a_student.studentid, phonetypeseq=1)[:1].get()
+                except Phoneperson.DoesNotExist:
+                    write_error("home_phone", a_student.studentid)
+                    print '*********'
+                    print 'home_phone'
+                    print a_student.studentid
+                    print '*********'
+                    # need to add in 'code' for all !---xxxx---! items added in as placeholder
+
                 my_csv_row = [a_student.studentid, a_student.buildingcode, a_student.personseq.firstname,
                               a_student.personseq.middleinitial, a_student.personseq.lastname, a_student.gradelevel,
                               a_student.gender, a_stuethnicx.ethnicracecodesseq.ethniccode, a_student.dateofbirth,
