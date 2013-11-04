@@ -3,4 +3,4 @@
 /static
 *.pyc
 /.idea
-
+.DS_Store
