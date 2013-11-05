@@ -10,7 +10,7 @@ def get_full_address(data):
     return mydata
 
 
-def write_error(err_name, studentid):
-    error_file = 'student_error.txt'
-    err = open(error_file, 'a')
+def write_error(error_file, err_name, studentid):
+    my_error_file = 'logs/%s' % error_file
+    err = open(my_error_file, 'a')
     err.write(str(studentid) + ',' +  err_name+ '\n')

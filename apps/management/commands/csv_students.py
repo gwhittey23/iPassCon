@@ -3,7 +3,8 @@ from django.core.management.base import BaseCommand
 from ...helpers import get_full_address, write_error
 from conv.models import Student, Stuethnicx, Addressperson, Phoneperson, Entrywithdrawl, Guardianstudent
 import csv
-
+from datetime import datetime
+enumerate
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
@@ -21,6 +22,9 @@ class Command(BaseCommand):
     def handle(self, action=None, **options):
         # this will run the code to process the student tab from powerschool
         if action == 'output':
+            my_format = "%m%d%y%H%M%S"
+            error_file = 'student_error_%s.csv' % datetime.now().strftime(my_format)
+            
             # set CVS out file files
             csv_output_file = 'csv_output/csv_student1.csv'
             print csv_output_file
@@ -32,9 +36,9 @@ class Command(BaseCommand):
             outfile = open(csv_output_file, "wb")
             my_writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             my_writer.writerow(header)
-
-            student_data = Student.objects.all()[:100]
-            for a_student in student_data:
+            student_data = Student.objects.all()
+            for counter, a_student in enumerate(student_data):
+                print "The Counts is %s of %i" % (counter, len(student_data))
                 #print a_student.studentid
                 mother_full_name = ''
                 mother_phone_day = ''
@@ -66,7 +70,7 @@ class Command(BaseCommand):
                                    :1].get()  # student ethnicity
                     a_student_race = a_stuethnicx.ethnicracecodesseq.ethniccode
                 except Stuethnicx.DoesNotExist:
-                    write_error("a_stuethnicx", a_student.studentid)
+                    write_error(error_file, "a_stuethnicx", a_student.studentid)
 
                     print '*********'
                     print "a_stuethnicx"
@@ -76,7 +80,7 @@ class Command(BaseCommand):
                     student_address = Addressperson.objects.filter(studentid=a_student.studentid, addresstypeseq=2)[
                                       :1].get()
                 except Addressperson.DoesNotExist:
-                    write_error("student_address", a_student.studentid)
+                    write_error(error_file, "student_address", a_student.studentid)
                     print '*********'
                     print "student_address"
                     print a_student.studentid
@@ -85,7 +89,7 @@ class Command(BaseCommand):
                     mailing_address = Addressperson.objects.filter(studentid=a_student.studentid, addresstypeseq=5)[
                                       :1].get()
                 except Addressperson.DoesNotExist:
-                    write_error("mailing_address", a_student.studentid)
+                    write_error(error_file, "mailing_address", a_student.studentid)
                     print '*********'
                     print 'mailing_address'
                     print a_student.studentid
@@ -97,7 +101,7 @@ class Command(BaseCommand):
                 try:
                     home_phone = Phoneperson.objects.filter(studentid=a_student.studentid, phonetypeseq=1)[:1].get()
                 except Phoneperson.DoesNotExist:
-                    write_error("home_phone", a_student.studentid)
+                    write_error(error_file, "home_phone", a_student.studentid)
                     print '*********'
                     print 'home_phone'
                     print a_student.studentid
@@ -108,29 +112,31 @@ class Command(BaseCommand):
                         [:1].get().yearentrydate
                 except Entrywithdrawl.DoesNotExist:
                     entry_date = ''
-                    write_error("entry_date", a_student.studentid)
+                    write_error(error_file, "entry_date", a_student.studentid)
                 try:
-                    a_father = Guardianstudent.objects.filter(studentid=a_student.studentid, relationshipseq=1)[:1].get()
+                    a_father = Guardianstudent.objects.filter(studentid=a_student.studentid, relationshipseq=1)[
+                               :1].get()
                     father_full_name = a_father.personseq.firstname + ' ' + a_father.personseq.lastname
                     try:
                         father_phone = Phoneperson.objects.filter(personseq=a_father.personseq.personseq)
                         father_phone_day = father_phone.filter(phonetypeseq=2)[:1].get().phoneseq.phoneno
                         father_phone_home = father_phone.filter(phonetypeseq=1)[:1].get().phoneseq.phoneno
                     except Phoneperson.DoesNotExist:
-                        write_error("father_phone", a_student.studentid)
+                        write_error(error_file, "father_phone", a_student.studentid)
                 except Guardianstudent.DoesNotExist:
-                    write_error("No Father Listed", a_student.studentid)
+                    write_error(error_file, "No Father Listed", a_student.studentid)
                 try:
-                    a_mother = Guardianstudent.objects.filter(studentid=a_student.studentid, relationshipseq=2)[:1].get()
+                    a_mother = Guardianstudent.objects.filter(studentid=a_student.studentid, relationshipseq=2)[
+                               :1].get()
                     mother_full_name = a_mother.personseq.firstname + ' ' + a_mother.personseq.lastname
                     try:
                         mother_phone = Phoneperson.objects.filter(personseq=a_mother.personseq.personseq)
                         mother_phone_day = mother_phone.filter(phonetypeseq=2)[:1].get().phoneseq.phoneno
                         mother_phone_home = mother_phone.filter(phonetypeseq=1)[:1].get().phoneseq.phoneno
                     except Phoneperson.DoesNotExist:
-                        write_error('mother_phone', a_student.studentid)
+                        write_error(error_file, 'mother_phone', a_student.studentid)
                 except Guardianstudent.DoesNotExist:
-                    write_error("No Mother Listed", a_student.studentid)
+                    write_error(error_file, "No Mother Listed", a_student.studentid)
                 try:
                     a_guardian = Guardianstudent.objects.filter(studentid=a_student.studentid, relationshipseq=32,
                                                                 legalstatusseq=7)[:1].get()
@@ -141,33 +147,38 @@ class Command(BaseCommand):
                     pass
                 try:
                     emerg_contact = Guardianstudent.objects.filter(studentid=a_student.studentid, relationshipseq=37)
-                    print len(emerg_contact)
                     if emerg_contact:
                         if emerg_contact[0]:
-                            emerg1_contact_name = emerg_contact[0].personseq.firstname + ' ' + emerg_contact[0].personseq.lastname
+                            emerg1_contact_name = emerg_contact[0].personseq.firstname + ' ' + emerg_contact[
+                                0].personseq.lastname
                             emerg1_relationship = emerg_contact[0].relationshipseq.relationshipdescr
                             try:
-                                emerg1_phone = Phoneperson.objects.filter(personseq=emerg_contact[0].personseq.personseq)[:1].get()
+                                emerg1_phone = Phoneperson.objects.filter(
+                                    personseq=emerg_contact[0].personseq.personseq)[:1].get()
                                 emerg1_ptype = emerg1_phone.phonetypeseq.phonetypedescr
                                 emerg1_phone_number = emerg1_phone.phoneseq.phoneno
                             except Phoneperson.DoesNotExist:
                                 pass
                     if len(emerg_contact) > 1:
                         if emerg_contact[1]:
-                            emerg2_contact_name = emerg_contact[1].personseq.firstname + ' ' + emerg_contact[1].personseq.lastname
+                            emerg2_contact_name = emerg_contact[1].personseq.firstname + ' ' + emerg_contact[
+                                1].personseq.lastname
                             emerg2_relationship = emerg_contact[1].relationshipseq.relationshipdescr
                             try:
-                                emerg2_phone = Phoneperson.objects.filter(personseq=emerg_contact[1].personseq.personseq)[:1].get()
+                                emerg2_phone = Phoneperson.objects.filter(
+                                    personseq=emerg_contact[1].personseq.personseq)[:1].get()
                                 emerg2_ptype = emerg2_phone.phonetypeseq.phonetypedescr
                                 emerg2_phone_number = emerg2_phone.phoneseq.phoneno
                             except Phoneperson.DoesNotExist:
                                 pass
                     if len(emerg_contact) > 2:
                         if emerg_contact[2]:
-                            emerg2_contact_name = emerg_contact[2].personseq.firstname + ' ' + emerg_contact[2].personseq.lastname
+                            emerg2_contact_name = emerg_contact[2].personseq.firstname + ' ' + emerg_contact[
+                                2].personseq.lastname
                             emerg2_relationship = emerg_contact[2].relationshipseq.relationshipdescr
                             try:
-                                emerg3_phone = Phoneperson.objects.filter(personseq=emerg_contact[2].personseq.personseq)[:1].get()
+                                emerg3_phone = Phoneperson.objects.filter(
+                                    personseq=emerg_contact[2].personseq.personseq)[:1].get()
                                 emerg3_ptype = emerg3_phone.phonetypeseq.phonetypedescr
                                 emerg3_phone_number = emerg3_phone.phoneseq.phoneno
                             except Phoneperson.DoesNotExist:
