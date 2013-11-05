@@ -4,7 +4,6 @@ from ...helpers import get_full_address, write_error
 from conv.models import Student, Stuethnicx, Addressperson, Phoneperson, Entrywithdrawl, Guardianstudent
 import csv
 from datetime import datetime
-enumerate
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
