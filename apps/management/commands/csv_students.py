@@ -1,7 +1,9 @@
 from optparse import make_option
 from django.core.management.base import BaseCommand
 from ...helpers import get_full_address, write_error
-from conv.models import Student, Stuethnicx, Addressperson, Phoneperson, Entrywithdrawl, Guardianstudent
+from conv.models import Student, Stuethnicx, Addressperson, Phoneperson, Entrywithdrawl, Guardianstudent, \
+    Schoolprofile, Stuschoolenroll
+
 import csv
 from datetime import datetime
 
@@ -35,7 +37,7 @@ class Command(BaseCommand):
             outfile = open(csv_output_file, "wb")
             my_writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             my_writer.writerow(header)
-            student_data = Student.objects.all()
+            student_data = Student.objects.all().order_by('studentid')
             for counter, a_student in enumerate(student_data):
                 print "The Counts is %s of %i" % (counter, len(student_data))
                 #print a_student.studentid
@@ -64,6 +66,7 @@ class Command(BaseCommand):
                 emerg3_phone = ''
                 emerg3_ptype = ''
                 emerg3_phone_number = ''
+                school_number = ''
                 try:
                     a_stuethnicx = Stuethnicx.objects.filter(studentid=a_student.studentid)[
                                    :1].get()  # student ethnicity
@@ -137,8 +140,16 @@ class Command(BaseCommand):
                 except Guardianstudent.DoesNotExist:
                     write_error(error_file, "No Mother Listed", a_student.studentid)
                 try:
-                    a_guardian = Guardianstudent.objects.filter(studentid=a_student.studentid, relationshipseq=32,
-                                                                legalstatusseq=7)[:1].get()
+                    a_guardian = Guardianstudent.objects.filter(studentid=a_student.studentid,
+                                                                legalstatusseq=7).exclude(relationshipseq=32)[:1].get()
+                    a_guardianship = a_guardian.relationshipseq.relationshipdescr
+                    guardian_fn = a_guardian.personseq.firstname
+                    guardian_ln = a_guardian.personseq.lastname
+                except Guardianstudent.DoesNotExist:
+                    pass
+                try:
+                    a_guardian = Guardianstudent.objects.filter(studentid=a_student.studentid, relationshipseq=32
+                                                                )[:1].get()
                     a_guardianship = a_guardian.relationshipseq.relationshipdescr
                     guardian_fn = a_guardian.personseq.firstname
                     guardian_ln = a_guardian.personseq.lastname
@@ -184,12 +195,56 @@ class Command(BaseCommand):
                                 pass
                 except Guardianstudent.DoesNotExist:
                     pass
-                my_csv_row = [a_student.studentid, "School ID", a_student.personseq.firstname,
+                #Getting student school code
+                if a_student.gradelevel == "12" or "11" or "10" or "09":
+                    school_number = '2056112'
+                elif a_student.gradelevel == "07" or "08":
+                    try:
+                        t_school_number = Stuschoolenroll.objects.filter(studentid=a_student.studentid).order_by('buildingentrydate')[:1].get()
+                        if t_school_number.schoolprofileseq == 2:
+                            school_number = '2055212'
+                        elif t_school_number.schoolprofileseq == 3:
+                            school_number = '2055112'
+                        else:
+                            school_number = 'gr78 no number listed'
+                    except Stuschoolenroll.DoesNotExist:
+                        print "___________"
+                        print a_student.studentid
+                        print "___________"
+                elif a_student.gradelevel == 'G10' or 'G11' or 'G12':
+                    school_number = 'Graduated'
+                from django.db.models import Q
+                try:
+
+                    district_entry_date = Entrywithdrawl.objects.filter(
+                        Q(studentid=a_student.studentid), Q(entrywithdrawlcodeseq=5) | Q(entrywithdrawlcodeseq=6)
+                        | Q(entrywithdrawlcodeseq=7) | Q(entrywithdrawlcodeseq=8) | Q(entrywithdrawlcodeseq=9)
+                        | Q(entrywithdrawlcodeseq=10) | Q(entrywithdrawlcodeseq=11)
+                    )[:1].get().yearentrydate
+                except Entrywithdrawl.DoesNotExist:
+                    pass
+               # for enrollstatus are going to come from entrywithdrawlcodes
+                #0 = Active 5-11
+                #1 = Inac#tive is 19,20,42,49-55
+                #2 = transfered out is 44-48,57
+                #3 = gradutated 17
+                try:
+                    query_item = Entrywithdrawl.objects.filter(
+                        studentid=a_student.studentid
+                    ).order_by('yearentrydate').reverse()[:1].get()
+                    if query_item.entrywithdrawlcodeseq in [5, 6, 7, 8, 9, 10, 11]:
+                        enroll_status = 0
+                    elif query_item.entrywithdrawlcodeseq in [19, 20, 42, range(49,55)]:
+                        enroll_status = 1
+                except Entrywithdrawl.DoesNotExist:
+                    pass
+
+                my_csv_row = [a_student.studentid, school_number, a_student.personseq.firstname,
                               a_student.personseq.middleinitial, a_student.personseq.lastname, a_student.gradelevel,
                               a_student.gender, a_student_race, a_student.dateofbirth, a_student.ssn, entry_date,
-                              "!---Exitdate---!", "!---Enroll Statu---", a_student.gradelevel, "!---Next_School---",
+                              "!---Exitdate---!", enroll_status, a_student.gradelevel, "!---Next_School---",
                               "Sched_Scheduled---!", "!---Sched_YearOfGraduation---!", "!---EntryCode---!",
-                              "!---TransferComment---!", "!---Districtentrydate---!", "!---Schoolentrydate---!",
+                              "!---TransferComment---!", district_entry_date, "!---Schoolentrydate---!",
                               home_address_street, student_address.addressseq.city, student_address.addressseq.state,
                               student_address.addressseq.zipcode, home_phone.phoneseq.phoneno, "!---Family_Ident---!",
                               mailing_address_street, mailing_address.addressseq.city, mailing_address.addressseq.state,

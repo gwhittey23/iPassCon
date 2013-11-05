@@ -189,7 +189,7 @@ class Legalstatus(models.Model):
 
     class Meta:
         db_table = 'legalstatus'
-
+        managed = False
 
 class Relationship(models.Model):
     relationshipseq = models.IntegerField(primary_key=True)
@@ -197,6 +197,38 @@ class Relationship(models.Model):
 
     class Meta:
         db_table = 'relationship'
+        managed = False
+
+class Schoolprofile(models.Model):
+    schoolprofileseq = models.IntegerField(primary_key=True)
+    lastpromotedyear = models.CharField(max_length=16L, blank=True)
+    schoolcode = models.CharField(max_length=10L, blank=True)
+    schooltype = models.CharField(max_length=6L, blank=True)
+    schoolname = models.CharField(max_length=51L, blank=True)
+    logoimagefilename = models.CharField(max_length=8L, blank=True)
+    administrator = models.CharField(max_length=33L, blank=True)
+    admintitle = models.CharField(max_length=38L, blank=True)
+    dpsecretary = models.CharField(max_length=25L, blank=True)
+    techdirector = models.CharField(max_length=23L, blank=True)
+    guidancedir = models.CharField(max_length=24L, blank=True)
+    guidancesec = models.CharField(max_length=21L, blank=True)
+    technicalschool = models.IntegerField(null=True, blank=True)
+    periodattendance = models.IntegerField(null=True, blank=True)
+    startingid = models.IntegerField(null=True, blank=True)
+    endingid = models.IntegerField(null=True, blank=True)
+    website = models.CharField(max_length=49L, blank=True)
+    datestamp = models.DateField(null=True, blank=True)
+    phoneseq = models.IntegerField(null=True, blank=True)
+    addressseq = models.IntegerField(null=True, blank=True)
+    districtprofileseq = models.IntegerField(null=True, blank=True)
+    cycletype = models.CharField(max_length=5L, blank=True)
+    daysincycle = models.IntegerField(null=True, blank=True)
+    numberofperiodsperday = models.IntegerField(null=True, blank=True)
+    logoutpage = models.CharField(max_length=5L, blank=True)
+
+    class Meta:
+        db_table = 'schoolprofile'
+        managed = False
 
 
 class Student(models.Model):
@@ -259,6 +291,16 @@ class Stuethnicx(models.Model):
 
     def __unicode__(self):  # Python 3: def __str__(self):
         return self.ethnicracecodesseq
+
+
+class Stuschoolenroll(models.Model):
+    schoolprofileseq = models.ForeignKey(Schoolprofile, db_column='schoolprofileseq')
+    studentid = models.ForeignKey(Student, db_column='studentid')
+    buildingentrydate = models.DateField(null=True, blank=True)
+    buildingentryseq = models.IntegerField(primary_key=True)
+    class Meta:
+        db_table = 'stuschoolenroll'
+        managed = False
 
 
 class Teacher(models.Model):
