@@ -164,6 +164,41 @@ class Phonetype(models.Model):
         db_table = 'phonetype'
         managed = False
 
+
+class Guardianstudent(models.Model):
+    personseq = models.ForeignKey('Person', db_column='personseq')
+    candismiss = models.IntegerField(null=True, blank=True)
+    legalstatusseq = models.ForeignKey('Legalstatus', null=True, db_column='legalstatusseq', blank=True)
+    relationshipseq = models.ForeignKey('Relationship', null=True, db_column='relationshipseq', blank=True)
+    receivestudent = models.IntegerField(null=True, blank=True)
+    primarystudent = models.IntegerField(null=True, blank=True)
+    studentid = models.IntegerField()
+    liveswstudent = models.IntegerField(null=True, blank=True)
+    receivesmail = models.IntegerField(null=True, blank=True)
+    internetaccess = models.IntegerField(null=True, blank=True)
+    displayorder = models.IntegerField(null=True, blank=True)
+    disallowedpages = models.CharField(primary_key=True,max_length=5L, blank=True)
+
+    class Meta:
+        db_table = 'guardianstudent'
+        managed = False
+
+class Legalstatus(models.Model):
+    legalstatusseq = models.IntegerField(primary_key=True)
+    legalstatusdescr = models.CharField(max_length=31L, blank=True)
+
+    class Meta:
+        db_table = 'legalstatus'
+
+
+class Relationship(models.Model):
+    relationshipseq = models.IntegerField(primary_key=True)
+    relationshipdescr = models.CharField(max_length=27L, blank=True)
+
+    class Meta:
+        db_table = 'relationship'
+
+
 class Student(models.Model):
     gender = models.IntegerField(null=True, blank=True)
     dateofbirth = models.DateField(null=True, blank=True)

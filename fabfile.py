@@ -7,4 +7,3 @@ def con_students(my_task):
     with cd(code_dir):
         local("./manage.py " + my_task + "  -a output")
 
-    error_file = 'error.txt'
