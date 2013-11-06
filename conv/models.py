@@ -56,6 +56,15 @@ class Addresstype(models.Model):
         managed = False
 
 
+class Buildingcodes(models.Model):
+    buildingcode = models.CharField(max_length=10L, blank=True)
+    description = models.CharField(max_length=24L, blank=True)
+    buildingcodesseq = models.IntegerField(primary_key=True)
+    schoolprofileseq = models.IntegerField(null=True, blank=True)
+    class Meta:
+        db_table = 'buildingcodes'
+        managed = False
+
 class Entrywithdrawl(models.Model):
     studentid = models.ForeignKey('Student', db_column='studentid')
     entrywithdrawlseq = models.IntegerField(primary_key=True)
@@ -85,6 +94,25 @@ class Entrywithdrawl(models.Model):
         db_table = 'entrywithdrawl'
         managed = False
 
+
+class Enrollstatus(models.Model):
+    enrollstatusseq = models.IntegerField(primary_key=True)
+    enrollstatuscode = models.CharField(max_length=6L, blank=True)
+    enrollstatusdescr = models.CharField(max_length=16L, blank=True)
+
+    class Meta:
+        db_table = 'enrollstatus'
+        managed = False
+
+class Entrywithdrawlcodes(models.Model):
+    entrywithdrawlcodeseq = models.IntegerField(primary_key=True)
+    entrywithdrawlcode = models.CharField(max_length=11L, blank=True)
+    entrywithdrawldescr = models.TextField(blank=True)
+    statecode = models.CharField(max_length=7L, blank=True)
+    enrollstatusseq = models.ForeignKey(Enrollstatus, null=True, db_column='enrollstatusseq', blank=True)
+    class Meta:
+        db_table = 'entrywithdrawlcodes'
+        managed = False
 
 class Ethnicracecodes(models.Model):
     ethniccode = models.CharField(max_length=7L, blank=True)

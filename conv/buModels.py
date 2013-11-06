@@ -1089,6 +1089,7 @@ class Hrsbio(models.Model):
 
 class Hrscareer(models.Model):
     bargunitseq = models.IntegerField(null=True, blank=True)
+
     buildingcodeseq = models.IntegerField(null=True, blank=True)
     dateend = models.DateField(null=True, blank=True)
     datestart = models.DateField(null=True, blank=True)

@@ -2,7 +2,7 @@ from optparse import make_option
 from django.core.management.base import BaseCommand
 from ...helpers import get_full_address, write_error
 from conv.models import Student, Stuethnicx, Addressperson, Phoneperson, Entrywithdrawl, Guardianstudent, \
-    Schoolprofile, Stuschoolenroll
+    Entrywithdrawlcodes, Stuschoolenroll
 from django.db.models import Q
 import csv
 from datetime import datetime
@@ -246,8 +246,10 @@ class Command(BaseCommand):
                     if query_item.enrollmentstatuscodesseq in [7, 36]:
                         enroll_status = 0
                         Sched_Scheduled = 1
-                        entry_codeseq  = query_item.entrywithdrawlcodeseq
-
+                        t_entry_codeseq  = query_item.entrywithdrawlcodeseq
+                        entry_code = Entrywithdrawlcodes.objects.get(
+                            entrywithdrawlcodeseq=t_entry_codeseq
+                        ).entrywithdrawlcode
                     elif query_item.entrywithdrawlcodeseq in [
                         11, 13, 23, 29, 30, 31, 32, 33, 34, 35
                     ]:
@@ -276,8 +278,8 @@ class Command(BaseCommand):
                 my_csv_row = [a_student.studentid, school_number, a_student.personseq.firstname,
                               a_student.personseq.middleinitial, a_student.personseq.lastname, a_student.gradelevel,
                               a_student.gender, a_student_race, a_student.dateofbirth, a_student.ssn, entry_date,
-                              "!---Exitdate---!", enroll_status, a_student.gradelevel, next_school_number,
-                              Sched_Scheduled, a_student.originalyog, "!---EntryCode---!",
+                              "!---Exitdate---!", enroll_status,  next_school_number,
+                              Sched_Scheduled, a_student.originalyog, entry_code,
                               "!---TransferComment---!", district_entry_date, entry_sch_date,
                               home_address_street, student_address.addressseq.city, student_address.addressseq.state,
                               student_address.addressseq.zipcode, home_phone.phoneseq.phoneno, home_phone.phoneseq.phoneno,

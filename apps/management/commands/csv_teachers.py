@@ -1,9 +1,8 @@
 __author__ = 'Gerard Whittey'
-
+import csv
 from optparse import make_option
 from django.core.management.base import BaseCommand
-import csv
-
+from conv.models import Teacher, Buildingcodes
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
@@ -15,8 +14,6 @@ class Command(BaseCommand):
     )
     help = 'valid actions are output which outputs to csv file\n' \
            'more actions...'
-
-
     def handle(self, **options):
         #this will run the code to process the student tab from powerschool
         if options.get('action') == 'output':
@@ -31,11 +28,14 @@ class Command(BaseCommand):
             my_writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             my_writer.writerow(header)
             #add in db code here
-            from conv.models import Teacher
+
             teacher_data = Teacher.objects.all()
             for a_teacher in teacher_data:
+                try:
+                    b
+              a_teacher.buildingcodesseq.
                 #need to add in 'code' for all !---xxxx---! items added in as placeholder
-                my_csv_row = ["!---TeacherNumber---!", "!---SchoolID---!", "!---Last Name---!", "!---First Name---!",
+                my_csv_row = [a_teacher.teacherseq, "!---SchoolID---!", "!---Last Name---!", "!---First Name---!",
                               "!---Middle_name---!", "!---Title---!", "!---Gender---!", "!---DOB---!",
                               "!---Ethnicity---!", "!---Email_Addr---!", "!---StaffStatus---!", "!---Status---!",
                               "!---Home Phone---!", "!---School Phone---!", "!---SSN---!", "!---Street---!",
