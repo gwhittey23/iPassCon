@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 from ...helpers import get_full_address, write_error
 from conv.models import Student, Stuethnicx, Addressperson, Phoneperson, Entrywithdrawl, Guardianstudent, \
     Schoolprofile, Stuschoolenroll
-
+from django.db.models import Q
 import csv
 from datetime import datetime
 
@@ -37,7 +37,7 @@ class Command(BaseCommand):
             outfile = open(csv_output_file, "wb")
             my_writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             my_writer.writerow(header)
-            student_data = Student.objects.all().order_by('studentid')
+            student_data = Student.objects.all().order_by('studentid').exclude(gradelevel='06')
             for counter, a_student in enumerate(student_data):
                 print "The Counts is %s of %i" % (counter, len(student_data))
                 #print a_student.studentid
@@ -67,6 +67,9 @@ class Command(BaseCommand):
                 emerg3_ptype = ''
                 emerg3_phone_number = ''
                 school_number = ''
+                enroll_status = ''
+                Sched_Scheduled = 0
+                entry_sch_date = ''
                 try:
                     a_stuethnicx = Stuethnicx.objects.filter(studentid=a_student.studentid)[
                                    :1].get()  # student ethnicity
@@ -198,7 +201,13 @@ class Command(BaseCommand):
                 #Getting student school code
                 if a_student.gradelevel == "12" or "11" or "10" or "09":
                     school_number = '2056112'
+                    if a_student == '12':
+                        next_school_number = '999999'
+                    else:
+                        next_school_number = '2056112'
                 elif a_student.gradelevel == "07" or "08":
+                    if a_student.gradelevel == "08":
+                        next_school_number = '2056112'
                     try:
                         t_school_number = Stuschoolenroll.objects.filter(studentid=a_student.studentid).order_by('buildingentrydate')[:1].get()
                         if t_school_number.schoolprofileseq == 2:
@@ -207,13 +216,15 @@ class Command(BaseCommand):
                             school_number = '2055112'
                         else:
                             school_number = 'gr78 no number listed'
+                        if a_student.gradelevel == "07":
+                            next_school_number = school_number
                     except Stuschoolenroll.DoesNotExist:
-                        print "___________"
-                        print a_student.studentid
-                        print "___________"
+                        pass
+
                 elif a_student.gradelevel == 'G10' or 'G11' or 'G12':
                     school_number = 'Graduated'
-                from django.db.models import Q
+
+
                 try:
 
                     district_entry_date = Entrywithdrawl.objects.filter(
@@ -232,21 +243,44 @@ class Command(BaseCommand):
                     query_item = Entrywithdrawl.objects.filter(
                         studentid=a_student.studentid
                     ).order_by('yearentrydate').reverse()[:1].get()
-                    if query_item.entrywithdrawlcodeseq in [5, 6, 7, 8, 9, 10, 11]:
+                    if query_item.enrollmentstatuscodesseq in [7, 36]:
                         enroll_status = 0
-                    elif query_item.entrywithdrawlcodeseq in [19, 20, 42, range(49,55)]:
+                        Sched_Scheduled = 1
+                        entry_codeseq  = query_item.entrywithdrawlcodeseq
+
+                    elif query_item.entrywithdrawlcodeseq in [
+                        11, 13, 23, 29, 30, 31, 32, 33, 34, 35
+                    ]:
                         enroll_status = 1
+                    elif query_item.enrollmentstatuscodesseq in [
+                        24, 25, 26, 27, 28, 29, 37
+                    ]:
+                        enroll_status = 2
+                    elif query_item.enrollmentstatuscodesseq in [10, 14]:
+                        enroll_status = 3
                 except Entrywithdrawl.DoesNotExist:
                     pass
-
+                try:
+                    t_entry_sch_date = Entrywithdrawl.objects.filter(studentid=a_student.studentid)
+                    if a_student.gradelevel == "12" or "11" or "10" or "09":
+                        if t_entry_sch_date.count() >=3:
+                            entry_sch_date = t_entry_sch_date.get(enrollcounter=3).yearentrydate
+                        elif t_entry_sch_date.count() == 2:
+                            entry_sch_date = t_entry_sch_date.get(enrollcounter=2).yearentrydate
+                        elif t_entry_sch_date.count() == 1:
+                            entry_sch_date = t_entry_sch_date.get(enrollcounter=1).yearentrydate
+                        elif a_student.gradelevel == "07" or "08":
+                            entry_sch_date = t_entry_sch_date.get(enrollcounter=1).yearentrydate
+                except Entrywithdrawl.DoesNotExist:
+                    pass
                 my_csv_row = [a_student.studentid, school_number, a_student.personseq.firstname,
                               a_student.personseq.middleinitial, a_student.personseq.lastname, a_student.gradelevel,
                               a_student.gender, a_student_race, a_student.dateofbirth, a_student.ssn, entry_date,
-                              "!---Exitdate---!", enroll_status, a_student.gradelevel, "!---Next_School---",
-                              "Sched_Scheduled---!", "!---Sched_YearOfGraduation---!", "!---EntryCode---!",
-                              "!---TransferComment---!", district_entry_date, "!---Schoolentrydate---!",
+                              "!---Exitdate---!", enroll_status, a_student.gradelevel, next_school_number,
+                              Sched_Scheduled, a_student.originalyog, "!---EntryCode---!",
+                              "!---TransferComment---!", district_entry_date, entry_sch_date,
                               home_address_street, student_address.addressseq.city, student_address.addressseq.state,
-                              student_address.addressseq.zipcode, home_phone.phoneseq.phoneno, "!---Family_Ident---!",
+                              student_address.addressseq.zipcode, home_phone.phoneseq.phoneno, home_phone.phoneseq.phoneno,
                               mailing_address_street, mailing_address.addressseq.city, mailing_address.addressseq.state,
                               mailing_address.addressseq.zipcode, father_full_name, father_phone_day, father_phone_home,
                               mother_full_name, mother_phone_day, mother_phone_home, a_guardianship, guardian_ln,
