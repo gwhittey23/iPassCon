@@ -4,6 +4,7 @@ from optparse import make_option
 from django.core.management.base import BaseCommand
 from conv.models import Teacher, Buildingcodes
 
+
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--action', '-a',
@@ -31,10 +32,7 @@ class Command(BaseCommand):
 
             teacher_data = Teacher.objects.all()
             for a_teacher in teacher_data:
-                try:
-                    b
-              a_teacher.buildingcodesseq.
-                #need to add in 'code' for all !---xxxx---! items added in as placeholder
+             #need to add in 'code' for all !---xxxx---! items added in as placeholder
                 my_csv_row = [a_teacher.teacherseq, "!---SchoolID---!", "!---Last Name---!", "!---First Name---!",
                               "!---Middle_name---!", "!---Title---!", "!---Gender---!", "!---DOB---!",
                               "!---Ethnicity---!", "!---Email_Addr---!", "!---StaffStatus---!", "!---Status---!",

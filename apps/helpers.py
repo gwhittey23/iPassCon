@@ -14,3 +14,10 @@ def write_error(error_file, err_name, studentid):
     my_error_file = 'logs/%s' % error_file
     err = open(my_error_file, 'a')
     err.write(str(studentid) + ',' +  err_name+ '\n')
+
+
+def get_or_none(cls, **cond):
+    try:
+        return cls.objects.get(**cond)
+    except cls.DoesNotExist:
+        return None
