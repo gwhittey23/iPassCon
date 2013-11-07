@@ -23,6 +23,7 @@ class Command(BaseCommand):
     def handle(self, action=None, **options):
         # this will run the code to process the student tab from powerschool
         if action == 'output':
+            startTime = datetime.now()
             my_format = "%m%d%y%H%M%S"
             error_file = 'student_error_%s.csv' % datetime.now().strftime(my_format)
             
@@ -55,21 +56,23 @@ class Command(BaseCommand):
                 try: # get student race info
                     a_stuethnicx = Stuethnicx.objects.filter(studentid=a_student.studentid)[
                                    :1].get()  # student ethnicity
-                    a_student_race = a_stuethnicx.ethnicracecodesseq.ethniccode
+                    a_student_race_code = a_stuethnicx.ethnicracecodesseq.ethniccode
+                    if a_student_race_code == '04':
+                        a_student_race = 'W'
                 except Stuethnicx.DoesNotExist:
-                    write_error(error_file, "a_stuethnicx", a_student.studentid)
+                    write_error(error_file, "Stuethnicx", a_student.studentid)
 
                 try: # see if student is in the addressperson db and pick only student  address type
                     student_address = Addressperson.objects.filter(studentid=a_student.studentid, addresstypeseq=2)[
                                       :1].get()
                 except Addressperson.DoesNotExist:
-                    write_error(error_file, "student_address", a_student.studentid)
+                    write_error(error_file, "student_address:Addressperson", a_student.studentid)
 
                 try: # get student mailing address
                     mailing_address = Addressperson.objects.filter(studentid=a_student.studentid, addresstypeseq=5)[
                                       :1].get()
                 except Addressperson.DoesNotExist:
-                    write_error(error_file, "mailing_address", a_student.studentid)
+                    write_error(error_file, "mailing_address:Addressperson", a_student.studentid)
                 # have to join address from iPass address1,address2,address3 to 1 address field for powerschool
                 #mailing_address_street() does this.
                 mailing_address_street = get_full_address(mailing_address)
@@ -176,8 +179,6 @@ class Command(BaseCommand):
                 elif a_student.gradelevel in ["07", "08"]:
                     if a_student.gradelevel == "08":#if grade 8 we set next school to highschool code
                         next_school_number = '2056112'
-                    if a_student.gradelevel == "07":#if grade 7 we set next school to present school
-                            next_school_number = school_number
                     try: # see what school middle school is
                         t_school_number = Stuschoolenroll.objects.filter(studentid=a_student.studentid
                           ).order_by('buildingentrydate')[:1].get()
@@ -188,12 +189,13 @@ class Command(BaseCommand):
                             school_number = '2055112'
                             fteid = 3
                         else:
-                            school_number = 'gr78 no number listed'
+                            school_number = '2050000'
                     except Stuschoolenroll.DoesNotExist:
-                        write_error(error_file, 't_school_number', a_student.studentid)
+                        write_error(error_file, 'stuschoolenroll', a_student.studentid)
+                    if a_student.gradelevel == "07":#if grade 7 we set next school to present school
+                        next_school_number = school_number
                 elif a_student.gradelevel in ['G10', 'G11', 'G12', 'G13']:
                     school_number = 'Graduated'
-
 
                 try:
 
@@ -203,7 +205,7 @@ class Command(BaseCommand):
                         | Q(entrywithdrawlcodeseq=10) | Q(entrywithdrawlcodeseq=11)
                     )[:1].get().yearentrydate
                 except Entrywithdrawl.DoesNotExist:
-                    pass
+                     write_error(error_file, 'Entrywithdrawl:district_entry_date', a_student.studentid)
                # for enrollstatus are going to come from entrywithdrawlcodes
                 #0 = Active 5-11
                 #1 = Inac#tive is 19,20,42,49-55
@@ -213,7 +215,7 @@ class Command(BaseCommand):
                 try:
                     query_item = Entrywithdrawl.objects.filter(
                         studentid=a_student.studentid
-                    ).order_by('yearentrydate').reverse()[:1].get()
+                    ).order_by('entrywithdrawldate').reverse()[:1].get()
                     if query_item.enrollmentstatuscodesseq in [7, 36]:
                         enroll_status = 0
                         sched_scheduled = 1
@@ -233,22 +235,31 @@ class Command(BaseCommand):
                     elif query_item.enrollmentstatuscodesseq in [10, 14]:
                         enroll_status = 3
                 except Entrywithdrawl.DoesNotExist:
-                    pass
+                     write_error(error_file, 'Entrywithdrawl:enroll_status', a_student.studentid)
                 try:
                     t_entry_sch_date = Entrywithdrawl.objects.filter(studentid=a_student.studentid)
                     if a_student.gradelevel == "12" or "11" or "10" or "09":
                         if 5 >= t_entry_sch_date.count() >= 3:
-                            entry_sch_date = t_entry_sch_date.get(enrollcounter=3).entrywithdrawldate
+                            try:
+                                entry_sch_date = t_entry_sch_date.get(enrollcounter=3).entrywithdrawldate
+                            except Entrywithdrawl.DoesNotExist:
+                                write_error(error_file, "Entrywithdrawl:enrollcounter=3", a_student.studentid)
                         elif t_entry_sch_date.count() == 2:
-                            entry_sch_date = t_entry_sch_date.get(enrollcounter=2).entrywithdrawldate
+                            try:
+                                entry_sch_date = t_entry_sch_date.get(enrollcounter=2).entrywithdrawldate
+                            except Entrywithdrawl.DoesNotExist:
+                                write_error(error_file, "Entrywithdrawl:enrollcounter=2", a_student.studentid)
                         elif t_entry_sch_date.count() == 1:
-                            entry_sch_date = t_entry_sch_date.get(enrollcounter=1).entrywithdrawldate
+                            try:
+                                entry_sch_date = t_entry_sch_date.get(enrollcounter=1).entrywithdrawldate
+                            except Entrywithdrawl.DoesNotExist:
+                                write_error(error_file, "Entrywithdrawl:enrollcounter=1", a_student.studentid)
                         else:
                             entry_sch_date = ' ----school_entry date----'
                     elif a_student.gradelevel == "07" or "08":
                         entry_sch_date = t_entry_sch_date.get(enrollcounter=1).entrywithdrawldate
                 except Entrywithdrawl.DoesNotExist:
-                    write_error(error_file, "t_entry_sch_date", a_student.studentid)
+                    write_error(error_file, "Entrywithdrawl:entry_sch_date", a_student.studentid)
                 if a_student.gender == 0:
                     student_gender = 'F'
                 elif a_student.gender == 1:
@@ -269,3 +280,4 @@ class Command(BaseCommand):
                           emerg2_ptype, emerg2_phone_number, emerg3_contact_name, emerg3_relationship,
                           emerg3_ptype, emerg3_phone_number, a_student.homeroom]
                 my_writer.writerow(my_csv_row)
+                print(datetime.now()-startTime)
