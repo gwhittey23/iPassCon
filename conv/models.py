@@ -331,6 +331,23 @@ class Stuschoolenroll(models.Model):
         managed = False
 
 
+class Roomcatalog(models.Model):
+    description = models.TextField(blank=True)
+    capacity = models.IntegerField(null=True, blank=True)
+    schcounter = models.IntegerField(null=True, blank=True)
+    usedashomeroom = models.IntegerField(null=True, blank=True)
+    hrteacher = models.CharField(max_length=5L, blank=True)
+    gradelevel = models.CharField(max_length=18L, blank=True)
+    comment_field = models.CharField(max_length=31L, db_column='comment_', blank=True) # Field renamed because it ended with '_'.
+    roomcatalogseq = models.IntegerField(primary_key=True)
+    schoolprofileseq = models.IntegerField(null=True, blank=True)
+    roomcode = models.CharField(max_length=18L, blank=True)
+    buildingcodesseq = models.IntegerField(null=True, blank=True)
+    class Meta:
+        db_table = 'roomcatalog'
+        managed = False
+
+
 class Teacher(models.Model):
     personseq = models.ForeignKey(Person, null=True, db_column='personseq', blank=True)
     initials = models.CharField(max_length=8L, blank=True)

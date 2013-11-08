@@ -2,7 +2,7 @@ from optparse import make_option
 from django.core.management.base import BaseCommand
 from ...helpers import get_full_address, write_error
 from conv.models import Student, Stuethnicx, Addressperson, Phoneperson, Entrywithdrawl, Guardianstudent, \
-    Entrywithdrawlcodes, Stuschoolenroll
+    Entrywithdrawlcodes, Stuschoolenroll, Roomcatalog
 from django.db.models import Q
 import csv
 from datetime import datetime
@@ -40,7 +40,8 @@ class Command(BaseCommand):
             my_writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             my_writer.writerow(header)
             #get all students from student table except graldelevel 06
-            student_data = Student.objects.all().order_by('studentid').exclude(gradelevel='06').exclude(deletedflag=1)
+            student_data = Student.objects.all().order_by('studentid')\
+                .exclude(gradelevel='06').exclude(deletedflag=1)
             #go threw each student and gather info
             for counter, a_student in enumerate(student_data):
                 print "The Counts is %s of %i" % (counter, len(student_data))
@@ -51,14 +52,20 @@ class Command(BaseCommand):
                     emerg1_relationship, emerg1_phone, emerg1_ptype, emerg1_phone_number, emerg2_contact_name, \
                     emerg2_relationship, emerg2_phone, emerg2_ptype, emerg2_phone_number, emerg3_contact_name, \
                     emerg3_relationship, emerg3_phone, emerg3_ptype, emerg3_phone_number, school_number, enroll_status, \
-                    entry_code, entry_sch_date, entry_date, next_school_number, fteid = ('',)*32
-
+                    entry_code, entry_sch_date, entry_date, next_school_number, fteid, home_room, exit_date = ('',)*34
+                #get student oom because we have to take homeroom and look up seq of it in Table Roomcatalog
+                try:
+                    home_room = Roomcatalog.objects.get(roomcatalogseq=a_student.homeroom).roomcode
+                except Roomcatalog.DoesNotExist:
+                    write_error(error_file, "Roomcatalog", a_student.studentid)
                 try: # get student race info
                     a_stuethnicx = Stuethnicx.objects.filter(studentid=a_student.studentid)[
                                    :1].get()  # student ethnicity
                     a_student_race_code = a_stuethnicx.ethnicracecodesseq.ethniccode
                     if a_student_race_code == '04':
                         a_student_race = 'W'
+                    else:
+                        a_student_race = a_student_race_code
                 except Stuethnicx.DoesNotExist:
                     write_error(error_file, "Stuethnicx", a_student.studentid)
 
@@ -203,7 +210,7 @@ class Command(BaseCommand):
                         Q(studentid=a_student.studentid), Q(entrywithdrawlcodeseq=5) | Q(entrywithdrawlcodeseq=6)
                         | Q(entrywithdrawlcodeseq=7) | Q(entrywithdrawlcodeseq=8) | Q(entrywithdrawlcodeseq=9)
                         | Q(entrywithdrawlcodeseq=10) | Q(entrywithdrawlcodeseq=11)
-                    )[:1].get().yearentrydate
+                    )[:1].get().entrywithdrawldate
                 except Entrywithdrawl.DoesNotExist:
                      write_error(error_file, 'Entrywithdrawl:district_entry_date', a_student.studentid)
                # for enrollstatus are going to come from entrywithdrawlcodes
@@ -213,10 +220,11 @@ class Command(BaseCommand):
                 #3 = gradutated 17
                 #we are also getting entry code and entry date from this for all 0-active students
                 try:
-                    query_item = Entrywithdrawl.objects.filter(
+                    query_set =  Entrywithdrawl.objects.filter(
                         studentid=a_student.studentid
-                    ).order_by('entrywithdrawldate').reverse()[:1].get()
-                    if query_item.enrollmentstatuscodesseq in [7, 36]:
+                    ).order_by('-entrywithdrawldate')
+                    query_item = query_set[:1].get()
+                    if query_item.entrywithdrawlcodeseq in [3, 4, 5, 6, 7, 10, 11]:
                         enroll_status = 0
                         sched_scheduled = 1
                         entry_date = query_item.entrywithdrawldate
@@ -225,19 +233,32 @@ class Command(BaseCommand):
                             entrywithdrawlcodeseq=t_entry_codeseq
                         ).entrywithdrawlcode
                     elif query_item.entrywithdrawlcodeseq in [
-                        11, 13, 23, 29, 30, 31, 32, 33, 34, 35
+                       19, 20, 42, 49, 50, 51, 52, 53, 54, 55
                     ]:
                         enroll_status = 1
-                    elif query_item.enrollmentstatuscodesseq in [
-                        24, 25, 26, 27, 28, 29, 37
+                    elif query_item.entrywithdrawlcodeseq in [
+                        13, 43, 44, 45, 46, 47, 48, 57
                     ]:
+
                         enroll_status = 2
-                    elif query_item.enrollmentstatuscodesseq in [10, 14]:
+                    elif query_item.entrywithdrawlcodeseq in [
+                        17, 18
+                    ]:
                         enroll_status = 3
                 except Entrywithdrawl.DoesNotExist:
-                     write_error(error_file, 'Entrywithdrawl:enroll_status', a_student.studentid)
+                    write_error(error_file, 'Entrywithdrawl:enroll_status', a_student.studentid)
+
+                if query_item.entrywithdrawlcodeseq in [
+                    13, 17, 18, 19, 20, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 57
+                ]:
+                    exit_date = query_item.entrywithdrawldate
+                    for item in query_set[1:]:
+                        if item.entrywithdrawlcodeseq in [3, 5, 6, 7, 10, 11, 56]:
+                            entry_date = item.entrywithdrawldate
+                            break
                 try:
                     t_entry_sch_date = Entrywithdrawl.objects.filter(studentid=a_student.studentid)
+                    entrywithdraw_count = t_entry_sch_date.count()
                     if a_student.gradelevel == "12" or "11" or "10" or "09":
                         if 5 >= t_entry_sch_date.count() >= 3:
                             try:
@@ -278,6 +299,6 @@ class Command(BaseCommand):
                           a_guardianship, guardian_ln, guardian_fn, emerg1_contact_name, emerg1_relationship,
                           emerg1_ptype, emerg1_phone_number, emerg2_contact_name, emerg2_relationship,
                           emerg2_ptype, emerg2_phone_number, emerg3_contact_name, emerg3_relationship,
-                          emerg3_ptype, emerg3_phone_number, a_student.homeroom]
+                          emerg3_ptype, emerg3_phone_number, home_room, entrywithdraw_count]
                 my_writer.writerow(my_csv_row)
                 print(datetime.now()-startTime)
