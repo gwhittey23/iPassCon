@@ -3579,16 +3579,6 @@ class Teachercourse(models.Model):
     class Meta:
         db_table = 'teachercourse'
 
-class Teacherjobtypex(models.Model):
-    jobtypescodeseq = models.IntegerField()
-    teacherseq = models.ForeignKey(Teacher, db_column='teacherseq')
-    schoolprofileseq = models.ForeignKey(Schoolprofile, db_column='schoolprofileseq')
-    fet = models.IntegerField(null=True, blank=True)
-    islicensed = models.IntegerField(null=True, blank=True)
-    ishighqualify = models.IntegerField(null=True, blank=True)
-    mainjob = models.IntegerField(null=True, blank=True)
-    class Meta:
-        db_table = 'teacherjobtypex'
 
 class Teacherperiodsexclude(models.Model):
     calendaryearseq = models.ForeignKey(Calendaryear, null=True, db_column='calendaryearseq', blank=True)

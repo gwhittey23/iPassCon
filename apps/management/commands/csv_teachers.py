@@ -7,6 +7,7 @@ from django.db.models import Q
 import csv
 from datetime import datetime
 
+
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--long', '-l', dest='long',
