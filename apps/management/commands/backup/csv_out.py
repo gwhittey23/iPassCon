@@ -22,7 +22,7 @@ class Command(BaseCommand):
             handle1.write(t.render(my_context))
             handle1.close()
         if options.get('action') == 'output':
-            from conv.models import Student
+            from stu_app.models import Student
             csv_output_file = 'csv_output/csv_student1.txt'
             student_data = Student.objects.all()
             t = loader.get_template('csv_student1_template.txt')
@@ -31,5 +31,5 @@ class Command(BaseCommand):
             })
             csv_write(my_context=c, my_csv_output_file=csv_output_file)
             print "OK ran student tab csv output"
-        elif options.get('action') == 'teachers':
+        elif options.get('action') == 'teacher_app':
             print 'T'

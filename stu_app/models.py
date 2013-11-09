@@ -347,25 +347,3 @@ class Roomcatalog(models.Model):
         db_table = 'roomcatalog'
         managed = False
 
-
-class Teacher(models.Model):
-    personseq = models.ForeignKey(Person, null=True, db_column='personseq', blank=True)
-    initials = models.CharField(max_length=8L, blank=True)
-    officephone = models.CharField(max_length=14L, blank=True)
-    fulltime = models.IntegerField(null=True, blank=True)
-    office = models.CharField(max_length=8L, blank=True)
-    telephoneext = models.IntegerField(null=True, blank=True)
-    printname = models.CharField(max_length=37L, blank=True)
-    addressseq = models.IntegerField(null=True, blank=True)
-    towncodesseq = models.IntegerField(null=True, blank=True)
-    buildingcodesseq = models.IntegerField(null=True, blank=True)
-    teacherseq = models.IntegerField(primary_key=True)
-    homeroom = models.IntegerField(null=True, blank=True)
-    teacherstatusseq = models.IntegerField(null=True, blank=True)
-    departmentseq = models.IntegerField(null=True, blank=True)
-    deletedflag = models.IntegerField(null=True, blank=True)
-    consecutiveperiods = models.IntegerField(null=True, blank=True)
-
-    class Meta:
-        db_table = 'teacher'
-        managed = False

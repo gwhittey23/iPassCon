@@ -10,10 +10,10 @@ def get_full_address(data):
     return mydata
 
 
-def write_error(error_file, err_name, studentid):
+def write_error(error_file, err_name, id):
     my_error_file = 'logs/%s' % error_file
     err = open(my_error_file, 'a')
-    err.write(str(studentid) + ',' +  err_name+ '\n')
+    err.write(str(id) + ',' + err_name + '\n')
 
 
 def get_or_none(cls, **cond):
@@ -21,3 +21,17 @@ def get_or_none(cls, **cond):
         return cls.objects.get(**cond)
     except cls.DoesNotExist:
         return None
+
+
+def find_title(title):
+    if title == 1:
+        title = "Mr."
+    elif title == 2:
+        title = "Dr."
+    elif title == 4:
+        title = "Ms."
+    elif title == "8":
+        title = "Miss."
+    else:
+        title = "NO TITLE"
+    return title

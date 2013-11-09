@@ -1,0 +1,31 @@
+2056112 = Amity High School
+#2055112 = Amity Middle School Bethany
+#2055212 = Amity Middle School Orange
+#
+#entry date last date from entrywithdrawl
+#entrywithdrawlcodeseq = 5-11
+#
+#
+#
+for enrollstatus
+#0 = Active are going to come from entrywithdrawlcodes
+#5-11
+#1 = Inac#tive is
+#19,20,42,49-55
+#2 = transfered out
+#44-48,57
+#
+#
+--9-12
+#if enroll counter = 3 the entrydate
+
+if gradelvl = 7 and enrolecounter =1 
+if grade levle =8 then enroll = 2 
+
+
+, 5, 6, 7, 10, 11, 563
+
+
+
+
+#languagecodes from stulangcode

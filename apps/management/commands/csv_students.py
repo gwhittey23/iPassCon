@@ -1,7 +1,7 @@
 from optparse import make_option
 from django.core.management.base import BaseCommand
 from ...helpers import get_full_address, write_error
-from conv.models import Student, Stuethnicx, Addressperson, Phoneperson, Entrywithdrawl, Guardianstudent, \
+from stu_app.models import Student, Stuethnicx, Addressperson, Phoneperson, Entrywithdrawl, Guardianstudent, \
     Entrywithdrawlcodes, Stuschoolenroll, Roomcatalog
 from django.db.models import Q
 import csv
@@ -26,9 +26,9 @@ class Command(BaseCommand):
             startTime = datetime.now()
             my_format = "%m%d%y%H%M%S"
             error_file = 'student_error_%s.csv' % datetime.now().strftime(my_format)
-            
+            my_format2 = "%m_%d_%y_%H%M"
             # set CVS out file files
-            csv_output_file = 'csv_output/csv_student1.csv'
+            csv_output_file = 'csv_output/csv_student_%s.csv' % datetime.now().strftime(my_format2)
             csv_header = 'csv_input/csv_student_header.txt'
             #use header_file to fill in csv header from csv_header
             header_file = open(csv_header, 'r')
@@ -288,7 +288,7 @@ class Command(BaseCommand):
                 my_csv_row = [a_student.studentid, school_number, a_student.personseq.firstname,
                           a_student.personseq.middleinitial, a_student.personseq.lastname, a_student.gradelevel,
                           student_gender, a_student_race, a_student.dateofbirth, a_student.ssn, fteid,
-                          entry_date, "!---Exitdate---!", enroll_status, next_school_number, sched_scheduled,
+                          entry_date, exit_date, enroll_status, next_school_number, sched_scheduled,
                           a_student.originalyog, entry_code, "!---TransferComment---!", district_entry_date,
                           entry_sch_date, home_address_street, student_address.addressseq.city,
                           student_address.addressseq.state, student_address.addressseq.zipcode,
