@@ -26,11 +26,11 @@ class Command(BaseCommand):
         if action == 'output':
             startTime = datetime.now()
             my_format = "%m%d%y%H%M%S"
-            error_file = 'historical_grade__error_%s.csv' % datetime.now().strftime(my_format)
+            error_file = 'historical_grades_error_%s.csv' % datetime.now().strftime(my_format)
             my_format2 = "%m_%d_%y_%H%M"
             # set CVS out file files
-            csv_output_file = 'csv_output/historical_grade/csv_historical_grade_%s.csv' % datetime.now().strftime(my_format2)
-            csv_header = 'csv_input/historical_grade_header.txt'
+            csv_output_file = 'csv_output/grades/csv_grades_%s.csv' % datetime.now().strftime(my_format2)
+            csv_header = 'csv_input/csv_grades_header.txt'
             #use header_file to fill in csv header from csv_header
             header_file = open(csv_header, 'r')
             csv_header = csv.reader(header_file, delimiter=',', quotechar='"')
@@ -67,11 +67,11 @@ class Command(BaseCommand):
                     write_error(error_file,err_code,a_hgrade.transcriptseq)
 
             #"!----Grade----!"
-                    grade = a_hgrade.gradecode
+                grade = a_hgrade.gradecode
             #"!----Storecode----!"
-                    ipass_store_code = a_hgrade.
+
             #"!----SchoolName----!"
-                    school_name = a_hgrade.schoolname
+                school_name = a_hgrade.schoolname
             #"!----Grade_Level----!"
                 try:
                     grade_level = Gradelevel.objects.get(gradelevelseq=a_hgrade.gradelevelseq).gradelevel
@@ -118,10 +118,10 @@ class Command(BaseCommand):
                     earned_credits, grade, potential_crhrs, "!----Storecode----!",
                     "!----Termid----!", "!----GPA points----!", "!----GPA_AddedValue----!", "!----Percent----!",
                     school_name, grade_level, credit_type, "!----Teacher Name----!",
-                    school_id, "!----ExcludeFromGPA----!", "!----ExcludeFromClassRank----!",
-                    "!----ExcludeFromHonorRoll----!", "!----ExcludeFromTranscripts----!", "!----Replaced_Grade----!"
+                    school_id, exclude_from_gpa, exclude_from_rank,
+                    exclude_from_honorroll, exclude_from_stored_grades, "!----Replaced_Grade----!"
 
                 ]
 
                 my_writer.writerow(my_csv_row)
-                print(datetime.now()-startTime)
+            print(datetime.now()-startTime)

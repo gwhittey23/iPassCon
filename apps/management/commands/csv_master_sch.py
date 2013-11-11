@@ -137,7 +137,6 @@ class Command(BaseCommand):
                             termid = "2302"
 
                 elif school_id in ("2055212", "2055112"):
-                    print "ok"
                     a_termseq = a_master_sch_item.schooltermseq.termseq
                     try:
                         term_code = Terms.objects.get(termseq=a_termseq).termcode
