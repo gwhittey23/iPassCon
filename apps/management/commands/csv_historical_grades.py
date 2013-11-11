@@ -1,8 +1,7 @@
 from optparse import make_option
 from django.core.management.base import BaseCommand
 from ...helpers import get_full_address, write_error, find_title
-from master_schedule.models import Masterschoolschedule, Course, Teacherschedule, Hrsbio, Roomcatalog, \
-                                   Schoolcycle, Schoolperiods, Gradelevel, Terms
+from historical_grades.models import Stugrades, Grade
 import csv
 from datetime import datetime
 
@@ -40,14 +39,16 @@ class Command(BaseCommand):
             my_writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             my_writer.writerow(header)
             #get all Course from course table except
-            historical_grade__set = Masterschoolschedule.objects.filter(calendaryearseq=16)
+            historical_grade__set = Stugrades.objects.all().order_by('studentid')
 
             #go threw each teacher and gather info
-            for counter, a_historical_grade_item in enumerate(historical_grade__set):
+            for counter, a_hgrade in enumerate(historical_grade__set):
                 print "The Counts is %s of %i" % (counter, len(historical_grade__set))
-            #"!---Course Number---!"
+            #"!----Student_Number----!"
+                student_number = a_hgrade.studentid
+
                 my_csv_row = [
-                    "!----Student_Number----!", "!----Course Name----!", "!----Course Number----!",
+                    student_number, "!----Course Name----!", "!----Course Number----!",
                     "!----EarnedCrHrs----!", "!----Grade----!", "!----PotentialCrHrs----!", "!----Storecode----!",
                     "!----Termid----!", "!----GPA points----!", "!----GPA_AddedValue----!", "!----Percent----!",
                     "!----SchoolName----!", "!----Grade_Level----!", "!----Credit Type----!", "!----Teacher Name----!",
