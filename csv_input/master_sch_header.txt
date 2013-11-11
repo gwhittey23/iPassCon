@@ -1,0 +1,1 @@
+Course Number,Course Name,Section Number,TermID,Teacher Number,Teacher Name,Room,Expression ,Attendance_Type_Code,Att_Mode_Code,SchoolID,ExcludeFromClassRank,ExcludeFromGPA,ExcludeFromHonorRoll,ExcludeFromStoredGrades,MaxEnrollment,grade_level, school sch seq

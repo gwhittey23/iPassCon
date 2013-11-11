@@ -58,14 +58,29 @@ class Command(BaseCommand):
                 a_2014_entry= "Yes"
                 try:
                     schoolcourse_item = Schoolcourse.objects.get(courseseq=a_course.courseseq, calendaryearseq=16)
-                #"!---ExcludeFromClassRank---!"
-                    exclude_from_rank = schoolcourse_item.gparank
+                #"!---ExcludeFromClassRank---!"                #"!---ExcludeFromGPA---!"
+                    exclude_from = schoolcourse_item.gparank
+                    if exclude_from == 0:
+                        exclude_from_rank = 1
+                        exclude_from_gpa = 1
+                    elif exclude_from == 1:
+                        exclude_from_gpa = 0
+                        exclude_from_rank = 0
                 #"!---ExcludeFromGPA---!"
-                    exclude_from_gpa = schoolcourse_item.gparank
+
                 #"!---ExcludeFromHonorRoll---!"
                     exclude_from_honorroll = schoolcourse_item.honortypeseq
+                    if exclude_from_honorroll == 2:
+                       exclude_from_honorroll = 0
+                    elif exclude_from_honorroll == 3:
+                       exclude_from_honorroll = 1
+
                 #"!---ExcludeFromStoredGrades---!"
                     exclude_from_stored_grades = schoolcourse_item.printontranscript
+                    if exclude_from_stored_grades == 0:
+                        exclude_from_stored_grades = 1
+                    elif exclude_from_stored_grades == 1:
+                        exclude_from_stored_grades = 0
                     try:
                         schoolcoursedpt_item = Schoolcoursedept.objects.get(
                             schoolcourseseq=schoolcourse_item.schoolcourseseq

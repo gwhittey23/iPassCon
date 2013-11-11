@@ -54,6 +54,10 @@ class Command(BaseCommand):
                     emerg3_relationship, emerg3_phone, emerg3_ptype, emerg3_phone_number, school_number, enroll_status, \
                     entry_code, entry_sch_date, entry_date, next_school_number, fteid, home_room, exit_date = ('',)*34
                 #get student oom because we have to take homeroom and look up seq of it in Table Roomcatalog
+                a_student_yog = str(a_student.originalyog).replace("20","")
+
+                student_id = "%s%s" % (a_student.studentid, a_student_yog )
+                print student_id
                 try:
                     home_room = Roomcatalog.objects.get(roomcatalogseq=a_student.homeroom).roomcode
                 except Roomcatalog.DoesNotExist:
@@ -285,7 +289,7 @@ class Command(BaseCommand):
                     student_gender = 'F'
                 elif a_student.gender == 1:
                     student_gender = 'M'
-                my_csv_row = [a_student.studentid, school_number, a_student.personseq.firstname,
+                my_csv_row = [student_id, school_number, a_student.personseq.firstname,
                           a_student.personseq.middleinitial, a_student.personseq.lastname, a_student.gradelevel,
                           student_gender, a_student_race, a_student.dateofbirth, a_student.ssn, fteid,
                           entry_date, exit_date, enroll_status, next_school_number, sched_scheduled,
