@@ -41,7 +41,7 @@ class Command(BaseCommand):
             my_writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             my_writer.writerow(header)
             #get all teachers from teacher table except graldelevel 06
-            teacher_data = Teacherjobtypex.objects.filter(jobtypescodeseq=33, teacherseq__teacherstatusseq__exact=1)
+            teacher_data = Teacherjobtypex.objects.filter(jobtypescodeseq=40, teacherseq__teacherstatusseq__exact=1)
             #go threw each teacher and gather info
             for counter, a_teacher in enumerate(teacher_data):
                 print "The Counts is %s of %i" % (counter, len(teacher_data))
