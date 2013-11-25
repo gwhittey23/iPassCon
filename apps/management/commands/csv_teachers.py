@@ -41,11 +41,12 @@ class Command(BaseCommand):
             my_writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             my_writer.writerow(header)
             #get all teachers from teacher table except graldelevel 06
-            teacher_data = Teacherjobtypex.objects.filter(jobtypescodeseq=40, teacherseq__teacherstatusseq__exact=1)
+            teacher_data = Teacherjobtypex.objects.exclude(jobtypescodeseq__in=[12, 33, 40])
             #go threw each teacher and gather info
             for counter, a_teacher in enumerate(teacher_data):
                 print "The Counts is %s of %i" % (counter, len(teacher_data))
                 #"***************TeacherNumber"
+                t_altempid = ""
                 try:
                     t_altempid = Hrsbio.objects.get(personseq=a_teacher.teacherseq.personseq).altempid
                 except Hrsbio.DoesNotExist:
@@ -85,13 +86,19 @@ class Command(BaseCommand):
                     print phones.count()
                     try:
                         t_home_phone = phones.filter(phonetypeseq=1).get().phoneseq.phoneno
-                        print "tt"
                     except Phoneperson.DoesNotExist:
                         write_error(error_file,"Home Phone Look Up Failed", a_teacher.teacherseq.personseq)
+                    except Phoneperson.MultipleObjectsReturned:
+                        err_code = "This Person has Multiable Phone Listsings phonetypeseq=1"
+                        write_error(error_file, err_code, a_teacher.teacherseq.personseq)
                     try:
                         t_work_phone = phones.filter(phonetypeseq=2).get().phoneseq.phoneno
                     except Phoneperson.DoesNotExist:
                         write_error(error_file,"Work Phone Look Up Failed", a_teacher.teacherseq.personseq)
+                    except Phoneperson.MultipleObjectsReturned:
+                        err_code = "This Person has Multiable Phone Listsings phonetypeseq=2"
+                        write_error(error_file, err_code, a_teacher.teacherseq.personseq)
+
                 except Phoneperson.DoesNotExist:
                     write_error(error_file,"Phone Look Up Failed", a_teacher.teacherseq.personseq)
                 #"!---SSN---!"

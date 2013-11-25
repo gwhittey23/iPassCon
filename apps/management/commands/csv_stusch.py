@@ -41,13 +41,19 @@ class Command(BaseCommand):
             my_writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             my_writer.writerow(header)
             #get all Course from course table except
-            student_sch_set = Stuschedule.objects.filter(schooltermseq__range=(93, 105))
+            student_sch_set = Stuschedule.objects.filter(schooltermseq__range=(93, 96))[114490:]
             print student_sch_set.count()
             #go threw each teacher and gather info
             for counter, a_student_sch_item in enumerate(student_sch_set):
                 print "The Counts is %s of %i" % (counter, len(student_sch_set))
             #"!----SStudent_Number----!
                 student_number = a_student_sch_item.studentid.studentid
+                student_year_originalyog = a_student_sch_item.studentid.originalyog - 2000
+                student_year_yog = a_student_sch_item.studentid.yog - 2000
+                student_number_originalyog = '%s%s' % (student_number, student_year_originalyog)
+
+                student_number_yog = '%s%s' % (student_number, student_year_yog)
+                student_grade = a_student_sch_item.studentid.gradelevel
             #setting up to grab from   Masterschoolschedule table using  a_student_sch_item.scheduleseq
                 try:
                     mastersch_item = Masterschoolschedule.objects.get(scheduleseq=a_student_sch_item.scheduleseq)
@@ -55,10 +61,22 @@ class Command(BaseCommand):
                     section_number = mastersch_item.coursesectionseq.coursesecdesc
             #"!----Course_Number----!"#
                     course_seq = mastersch_item.schoolcourseseq.courseseq
+                    schoolcourse_seq = mastersch_item.schoolcourseseq.schoolcourseseq
+                    scheduleseq = mastersch_item.scheduleseq
+                    school_cycle = a_student_sch_item.schoolcycleseq
+                    num_of_terms = mastersch_item.schoolcourseseq.numofterms
+                    z_term_number = a_student_sch_item.schooltermseq.schooltermseq
+                    print num_of_terms
+                    if num_of_terms == 4:
+                        term_number = 2300
+                    elif z_term_number in(93, 94):
+                        term_number = 2301
+                    elif z_term_number in (95, 96):
+                        term_number = 2302
                     try:
                         course_number = Course.objects.get(courseseq=course_seq).coursetitle
                     except Course.DoesNotExist:
-                        err_code =  "No Course found for courseq = %s for schoolcourseq = %s" % (
+                        err_code = "No Course found for courseq = %s for schoolcourseq = %s" % (
                             course_seq, mastersch_item.schoolcourseseq
                         )
                         write_error(error_file, err_code , a_student_sch_item.scheduleseq)
@@ -79,8 +97,9 @@ class Command(BaseCommand):
                     err_code = "Schoolprifle not found for %s" % school_seq
                     write_error(error_file, err_code, a_student_sch_item.scheduleseq)
                 my_csv_row = [
-                    student_number, course_number, section_number,
-                    date_enrolled, date_left, "!----Term_Number----!", school_id
+                    student_number_yog, student_number_originalyog, course_number, section_number,
+                    date_enrolled, date_left, term_number, school_id, school_cycle, schoolcourse_seq, scheduleseq, z_term_number,
+                    student_grade
 
                 ]
                 my_writer.writerow(my_csv_row)
