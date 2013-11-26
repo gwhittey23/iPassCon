@@ -40,7 +40,7 @@ class Command(BaseCommand):
             my_writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             my_writer.writerow(header)
             #get all Course from course table except
-            master_sch_set = Masterschoolschedule.objects.filter(calendaryearseq=16)
+            master_sch_set = Masterschoolschedule.objects.filter(calendaryearseq=16,schoolprofileseq=1)
 
             #go threw each teacher and gather info
             for counter, a_master_sch_item in enumerate(master_sch_set):
@@ -115,6 +115,7 @@ class Command(BaseCommand):
             #"!----MaxEnrollment----!"
                 max_entrollment = a_master_sch_item.coursesectionseq.maxseats
             #"!----grade_level----!
+                grade_lvl = ''
                 try:
                     grade_lvl = Gradelevel.objects.get(gradelevelseq=a_master_sch_item.gradelevelseq).gradelevel
                 except Gradelevel.DoesNotExist:
@@ -123,36 +124,35 @@ class Command(BaseCommand):
                     write_error(error_file,err_code, a_master_sch_item.scheduleseq)
             #"!----TermID----!"
                 termid = ""
-                num_terms  = a_master_sch_item.schoolcourseseq.numofterms
+                term_number = ''
+                num_of_terms  = a_master_sch_item.schoolcourseseq.numofterms
+                z_term_number = a_master_sch_item.schooltermseq.schooltermseq
                 print school_id
-                if school_id == "2056112":
-                    if num_terms == 4:
-                        termid = "2300"
-                    elif num_terms == "1":
-                        termid = "It was num of terms =1"
-                    elif num_terms == "2":
-                        if a_master_sch_item.schooltermseq.termstartdate == 2013-8-13:
-                            termid = "2301"
-                        elif a_master_sch_item.schooltermseq.termstartdate == 2014-1-26:
-                            termid = "2302"
+                print num_of_terms
+                print "z_term_number = %s" % z_term_number
+                if school_id == '2056112':
+                    print "High School"
+                    print num_of_terms
+                    if num_of_terms == 4:
+                        term_number = 2300
+                    elif z_term_number in(93, 94):
+                        term_number = 2301
+                    elif z_term_number in (95, 96):
+                        term_number = 2302
+                    print "term num %s" % term_number
 
-                elif school_id in ("2055212", "2055112"):
-                    a_termseq = a_master_sch_item.schooltermseq.termseq
-                    try:
-                        term_code = Terms.objects.get(termseq=a_termseq).termcode
-                    except Terms.DoesNotExist:
-                        err_code = "this item has no term entry"
-                        write_error(error_file, err_code, a_master_sch_item.scheduleseq)
-                    if term_code == "Q1":
-                        termid = "2303"
-                    elif term_code == "Q2":
-                        termid = "2304"
-                    elif term_code == "Q3":
-                        termid = "2305"
-                    elif term_code == "Q4":
-                        termid = "2306"
+                elif school_id in ('2055212', '2055112'):
+                    print "Middle School"
+                    print num_of_terms
+                    if num_of_terms == 4:
+                        term_number = 2300
+                    elif z_term_number in(93, 94):
+                        term_number = 2301
+                    elif z_term_number in (95, 96):
+                        term_number = 2302
+                    print "term num %s" % term_number
                 my_csv_row = [
-                    course_number, course_name, section_number, termid,
+                    course_number, course_name, section_number, term_number,
                     teacher_number, teacher_name, room, expression,
                     "!----Attendance_Type_Code----!", "Att_ModeMeeting", school_id,
                     exclude_from_rank, exclude_from_gpa, exclude_from_honorroll,
