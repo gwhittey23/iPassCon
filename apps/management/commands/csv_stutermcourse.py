@@ -1,7 +1,7 @@
 from optparse import make_option
 from django.core.management.base import BaseCommand
 from ...helpers import get_full_address, write_error, find_title
-from student_sch.models import Stuschedule, Schoolterm, Pwrschid
+from student_sch.models import Stuschedule, Schoolterm, Pwrschid, Stutermcourse
 from master_schedule.models import Masterschoolschedule, Course,  Schoolprofile
 
 import csv
@@ -41,7 +41,7 @@ class Command(BaseCommand):
             my_writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             my_writer.writerow(header)
             #get all Course from course table except
-            student_sch_set = Stuschedule.objects.filter(schooltermseq__range=(93, 96))[110889:]
+            student_sch_set = Stutermcourse.objects.filter(schooltermseq__range=(93, 96))[110889:]
             print student_sch_set.count()
             #go threw each teacher and gather info
             for counter, a_student_sch_item in enumerate(student_sch_set):
@@ -62,8 +62,11 @@ class Command(BaseCommand):
                 except Pwrschid.DoesNotExist:
                     err_code = "missmatch on pwschoolid for %s" % a_student_sch_item.studentid
                     write_error(error_file, err_code, a_student_sch_item.studentid)
+                #look in stuschedule table for first item matching the studen
                 try:
-                    mastersch_item = Masterschoolschedule.objects.get(scheduleseq=a_student_sch_item.scheduleseq)
+                    mastersch_item = Masterschoolschedule.objects.get(
+                        scheduleseq=a_student_sch_item.scheduleseq
+                    )
             # "!----Section_Number----!
                     section_number = mastersch_item.coursesectionseq.coursesecdesc
             #"!----Course_Number----!"#
