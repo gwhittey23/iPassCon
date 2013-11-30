@@ -125,7 +125,6 @@ INSTALLED_APPS = (
     'stu_app',
     'apps',
     'teacher_app',
-    'django_extensions',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
