@@ -39,8 +39,11 @@ class Command(BaseCommand):
             outfile = open(csv_output_file, "wb")
             my_writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             my_writer.writerow(header)
+            school_orange = 2
+            school_hs = 1
+            school_bethany = 3
             #get all Course from course table except
-            master_sch_set = Masterschoolschedule.objects.filter(calendaryearseq=16,schoolprofileseq=1)
+            master_sch_set = Masterschoolschedule.objects.filter(calendaryearseq=16, schoolprofileseq=school_bethany)
 
             #go threw each teacher and gather info
             for counter, a_master_sch_item in enumerate(master_sch_set):
@@ -92,14 +95,14 @@ class Command(BaseCommand):
                     write_error(error_file, err_code, a_master_sch_item.roomcatalogseq)
 
             #"!----Expression ----!" (period and day)
-                master_sch__day = Schoolcycle.objects.get(
+                master_sch_day = Schoolcycle.objects.get(
                     schoolcycleseq=a_master_sch_item.schoolcycleseq
                 ).daytitleabbr
 
-                master_sch__period  = Schoolperiods.objects.get(
+                master_sch_period  = Schoolperiods.objects.get(
                     schoolperiodsseq=a_master_sch_item.schoolperiodsseq
                 ).periodtitleabbr
-                expression = "%s(%s)" % (master_sch__period, master_sch__day)
+                expression = "%s(%s)" % (master_sch_period, master_sch_day)
             # "!----SchoolID----!
                 school_id = a_master_sch_item.schoolprofileseq.schoolcode
                 school_id = "205%s" % school_id
@@ -125,7 +128,7 @@ class Command(BaseCommand):
             #"!----TermID----!"
                 termid = ""
                 term_number = ''
-                num_of_terms  = a_master_sch_item.schoolcourseseq.numofterms
+                num_of_terms = a_master_sch_item.schoolcourseseq.numofterms
                 z_term_number = a_master_sch_item.schooltermseq.schooltermseq
                 print school_id
                 print num_of_terms
@@ -140,23 +143,53 @@ class Command(BaseCommand):
                     elif z_term_number in (95, 96):
                         term_number = 2302
                     print "term num %s" % term_number
-
-                elif school_id in ('2055212', '2055112'):
-                    print "Middle School"
+                #orange school 5212
+                elif school_id == '2055212':
+                    print "orange Middle School"
                     print num_of_terms
                     if num_of_terms == 4:
                         term_number = 2300
-                    elif z_term_number in(93, 94):
-                        term_number = 2301
-                    elif z_term_number in (95, 96):
-                        term_number = 2302
-                    print "term num %s" % term_number
+                    elif num_of_terms == 1:
+                        if z_term_number == 101:
+                            term_number = 2303
+                        elif z_term_number == 102:
+                            term_number = 2304
+                        elif z_term_number == 103:
+                            term_number = 2305
+                        elif z_term_number == 104:
+                            term_number = 2306
+                    else:
+                        if z_term_number in (101, 102):
+                            term_number = 2301
+                        elif z_term_number in (103, 104):
+                            term_number = 2302
+                #Bethany school 5112
+                elif school_id == '2055112':
+                    print "orange Middle School"
+                    print num_of_terms
+                    if num_of_terms == 4:
+                        term_number = 2300
+                    elif num_of_terms == 1:
+                        if z_term_number == 97:
+                            term_number = 2303
+                        elif z_term_number == 98:
+                            term_number = 2304
+                        elif z_term_number == 99:
+                            term_number = 2305
+                        elif z_term_number == 100:
+                            term_number = 2306
+                    else:
+                        if z_term_number in (97, 98):
+                            term_number = 2301
+                        elif z_term_number in (99, 100):
+                            term_number = 2302
+                ipass_termid = "%s_%s" % (z_term_number, num_of_terms)
                 my_csv_row = [
-                    course_number, course_name, section_number, term_number,
+                   ipass_termid , course_number, course_name, section_number, term_number,
                     teacher_number, teacher_name, room, expression,
                     "!----Attendance_Type_Code----!", "Att_ModeMeeting", school_id,
                     exclude_from_rank, exclude_from_gpa, exclude_from_honorroll,
-                    exclude_from_stored_grades, max_entrollment, grade_lvl, a_master_sch_item.scheduleseq
+                    exclude_from_stored_grades, max_entrollment,a_master_sch_item.scheduleseq, master_sch_day, master_sch_period
                 ]
 
                 my_writer.writerow(my_csv_row)
