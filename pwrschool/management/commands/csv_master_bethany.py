@@ -1,13 +1,17 @@
 from optparse import make_option
-from django.core.management.base import BaseCommand
-from ...helpers import write_error
-from pwrschool.models import PwrschmasterOrange
 import csv
 from datetime import datetime
+
+from django.core.management.base import BaseCommand
+
+from ...pwrschool.helpers import write_error
+from pwrschool.models import PwrschmasterBethany
 
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
+        make_option('--long', '-l', dest='long',
+                    help='Help for the long options'),
         make_option('--action', '-a',
                     action='store',
                     help='the action',
@@ -26,7 +30,7 @@ class Command(BaseCommand):
             my_format2 = "%m_%d_%y_%H%M"
             # set CVS out file files
             my_termid = action
-            csv_output_file = 'csv_output/master_sch/%s_pwrmaster_Orange_%s.csv' % (my_termid, datetime.now().strftime(my_format2))
+            csv_output_file = 'csv_output/master_sch/%s_pwrmaster_Bethany_%s.csv' % (my_termid, datetime.now().strftime(my_format2))
             csv_header = 'csv_input/master_sch_header.txt'
             #use header_file to fill in csv header from csv_header
             header_file = open(csv_header, 'r')
@@ -38,15 +42,15 @@ class Command(BaseCommand):
             my_writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             my_writer.writerow(header)
             #get allCourse from course table except
-            section_set = PwrschmasterOrange.objects.distinct('section_number')
-            course_set = PwrschmasterOrange.objects.distinct('course_number')
-            full_set = PwrschmasterOrange.objects.all()
+            section_set = PwrschmasterBethany.objects.distinct('section_number')
+            course_set = PwrschmasterBethany.objects.distinct('course_number')
+            full_set = PwrschmasterBethany.objects.all()
             #go threw each teacher and gather info
             for a_section in section_set:
                 for a_course in course_set:
                     print "section  =%s Course=%s" % (a_section.section_number, a_course.course_number)
                     my_expression = ''
-                    new_set = PwrschmasterOrange.objects.all().filter(
+                    new_set = PwrschmasterBethany.objects.all().filter(
                         course_number=a_course.course_number,
                         section_number=a_section.section_number,
                         termid=my_termid
@@ -72,7 +76,7 @@ class Command(BaseCommand):
                         tmp_item = new_set[0]
                         my_csv_row = [
                             tmp_item.id, tmp_item.course_number, tmp_item.day, tmp_item.period, tmp_item.course_name, tmp_item.section_number, tmp_item.termid,
-                            tmp_item.teacher_number, tmp_item.teacher_name, tmp_item.room, total_expression.replace('    ', ''),
+                            tmp_item.teacher_number, tmp_item.teacher_name, tmp_item.room, total_expression,
                             "!----Attendance_Type_Code----!", "Att_ModeMeeting", tmp_item.schoolid,
                             tmp_item.excludefromclassrank, tmp_item.excludefromgpa, tmp_item.excludefromhonorroll,
                             tmp_item.excludefromstoredgrades, tmp_item.maxenrollment,tmp_item.masterseq
