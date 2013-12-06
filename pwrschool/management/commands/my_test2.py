@@ -13,7 +13,6 @@ class Command(BaseCommand):
             help='the action',
             dest='term',
             default=False,
-            help = '2300-2306'
         ),
         make_option(
             '--school', '-s',
@@ -21,7 +20,7 @@ class Command(BaseCommand):
             help='the action',
             dest='school',
             default=False,
-            help = 'valid choices are orange, bethany, or high scool'
+
         ),
 
     )
@@ -31,7 +30,7 @@ class Command(BaseCommand):
         if term and school:
             run_csv_out(term, school)
         else:
-            print('you for got a term and/pr school')
+            print('Error: you for got a term and/or school')
 
 
 def run_csv_out(term, school):
@@ -45,7 +44,7 @@ def run_csv_out(term, school):
         elif school == 'bethany':
             school_number = 2055112
             model_name = 'PwrschmasterBethany'
-        csv_output_file = 'csv_output/master_sch/%s_pwrmaster_%s_%s.csv' % (
+        csv_output_file = 'csv_output/power_school/%s_pwrmaster_%s_%s.csv' % (
             my_termid,
             school,
             datetime.now().strftime(my_format2)
