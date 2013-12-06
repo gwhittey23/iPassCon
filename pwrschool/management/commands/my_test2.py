@@ -44,6 +44,9 @@ def run_csv_out(term, school):
         elif school == 'bethany':
             school_number = 2055112
             model_name = 'PwrschmasterBethany'
+        elif school == 'high_school':
+            school_number = 2056212
+            model_name = 'Pwrschmaster'
         csv_output_file = 'csv_output/power_school/%s_pwrmaster_%s_%s.csv' % (
             my_termid,
             school,
