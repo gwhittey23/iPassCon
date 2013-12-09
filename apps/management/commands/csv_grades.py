@@ -36,13 +36,15 @@ class Command(BaseCommand):
             csv_header = csv.reader(header_file, delimiter=',', quotechar='"')
             header = csv_header.next()
             header_file.close()
-            #open csv outpu file
+            #open csv output file
             outfile = open(csv_output_file, "wb")
             my_writer = csv.writer(outfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
             my_writer.writerow(header)
             #get all Course from course table except
-            historical_grade__set = Transcript.objects.filter(studentid=1006).exclude(schoolprofileseq=0).order_by('studentid')
 
+            historical_grade__set = Transcript.objects.filter(
+                studentid=1006).exclude(schoolprofileseq=0).order_by('studentid'
+            )
             #go threw each teacher and gather info
             for counter, a_hgrade in enumerate(historical_grade__set):
                 print "The Counts is %s of %i" % (counter, len(historical_grade__set))

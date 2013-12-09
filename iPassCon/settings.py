@@ -140,6 +140,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'south',
 
+
 )
 DATABASE_ROUTERS = ['pwrschool.router.PowerSchoolRouter']
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
